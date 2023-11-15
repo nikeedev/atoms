@@ -1,6 +1,7 @@
 use std::fmt;
-
 #[allow(dead_code)]
+#[allow(unused_variables)]
+
 #[derive(Debug)]
 pub struct Vec2 {
     x: i32,
@@ -69,10 +70,10 @@ impl fmt::Display for Atom<'_> {
         // is very similar to `println!`.
         write!(
             f,
-            "-----------------------\nPosition {{ \n\tx: {}\n\ty: {}\n}}\n\nName: {}\nAtom: {}\nAtom number: {}\n\nEletrons: {}\nProtons: {}\nNeutrons: {}\nState of matter in 20°C: {}\nElement state/type: {}\n-----------------------\n",
+            "\n----------------------------------------------------------\nName: {}\nPosition {{ \n\tx: {}\n\ty: {}\n}}\nAtom: {}\nAtom number: {}\n\nEletrons: {}\nProtons: {}\nNeutrons: {}\nState of matter in 20°C: {}\nElement state/type: {}\n----------------------------------------------------------\n",
+            self.name,
             self.pos.x,
             self.pos.y,
-            self.name,
             self.atom,
             self.num,
             self.valence_electrons,
@@ -191,39 +192,38 @@ pub fn create_molecule(mut atoms: Vec<Atom>) -> Result<Molecule, Trash> {
 
     atoms.sort_by(|a, b| a.atom.cmp(b.atom));
 
-    let mut molecule_name: String = String::new();
-
-    let mut repeating_elements = 0;
-    let mut _repeating_atom: String = String::new();
-
-    let mut prev_atom: Option<&str> = Some(atoms.first().unwrap().atom);
-    
-    for (i, atom) in atoms.iter().enumerate() {
-        // dbg!(atom);
-        // dbg!(prev_atom);
-        // dbg!(_repeating_atom.clone());
-        // dbg!(repeating_elements);
-    
-        if let Some(prev) = prev_atom {
-            if atom.atom == prev {
-                repeating_elements += 1;
-            } else {
-                molecule_name.push_str(format!(" {}", match_it(repeating_elements, prev)).as_str());
-                repeating_elements = 1; // Set to 1 for the current different atom
-            }
-        } else {
-            repeating_elements = 1; // Set to 1 for the first atom
-        }
-        prev_atom = Some(atom.atom);
-    
-        // Add handling for the last atom to update molecule_name
-        if i == atoms.len() - 1 {
-            molecule_name.push_str(format!(" {}", match_it(repeating_elements, prev_atom.unwrap())).as_str());
-        }
-    }
-
     // If atoms fulfill the octet rule, create the molecule
     if can_form_molecule {
+        let mut molecule_name: String = String::new();
+
+        let mut repeating_elements = 0;
+        let mut _repeating_atom: String = String::new();
+    
+        let mut prev_atom: Option<&str> = Some(atoms.first().unwrap().atom);
+        
+        for (i, atom) in atoms.iter().enumerate() {
+            // dbg!(atom);
+            // dbg!(prev_atom);
+            // dbg!(_repeating_atom.clone());
+            // dbg!(repeating_elements);
+        
+            if let Some(prev) = prev_atom {
+                if atom.atom == prev {
+                    repeating_elements += 1;
+                } else {
+                    molecule_name.push_str(format!(" {}", match_it(repeating_elements, prev)).as_str());
+                    repeating_elements = 1; // Set to 1 for the current different atom
+                }
+            } else {
+                repeating_elements = 1; // Set to 1 for the first atom
+            }
+            prev_atom = Some(atom.atom);
+        
+            // Add handling for the last atom to update molecule_name
+            if i == atoms.len() - 1 {
+                molecule_name.push_str(format!(" {}", match_it(repeating_elements, prev_atom.unwrap())).as_str());
+            }
+        }
         // Assuming the molecule name is "MoleculeName" for demonstration purposes
         let molecule = Molecule {
             atoms,
