@@ -1,4 +1,6 @@
 use std::fmt;
+use colored::*;
+
 #[allow(dead_code)]
 #[allow(unused_variables)]
 
@@ -70,17 +72,19 @@ impl fmt::Display for Atom<'_> {
         // is very similar to `println!`.
         write!(
             f,
-            "\n----------------------------------------------------------\nName: {}\nPosition {{ \n\tx: {}\n\ty: {}\n}}\nAtom: {}\nAtom number: {}\n\nEletrons: {}\nProtons: {}\nNeutrons: {}\nState of matter in 20°C: {}\nElement state/type: {}\n----------------------------------------------------------\n",
-            self.name,
+            "\n{}\nName: {}\nPosition {{ \n\tx: {}\n\ty: {}\n}}\nAtom name: {}\nAtom number: {}\n\nValence eletrons: {}\nProtons: {}\nNeutrons: {}\nState of matter in 20°C: {}\nElement state/type: {}\n{}\n",
+            "----------------------------------------------------------".green(),
+            self.name.bright_green().bold(),
             self.pos.x,
             self.pos.y,
-            self.atom,
+            self.atom.bright_purple(),
             self.num,
             self.valence_electrons,
             self.protons,
             self.neutrons,
             self.matter_state,
-            self.element_state
+            self.element_state,
+            "----------------------------------------------------------".green()
         )
     }
 }
@@ -151,9 +155,9 @@ impl fmt::Display for Molecule<'_> {
         // is very similar to `println!`.
         write!(
             f,
-            "Molecule :D \n\nAtoms {}\nMolecule name: {}\nTotal electrons: {}\n",
+            "Molecule :D \n\nMolecule name:{}\nAtoms: \n{}\nTotal valence electrons: {}\n",
+            self.name.bold(),
             DisplayableVec(&self.atoms),
-            self.name,
             self.total_electrons
         )
     }
@@ -173,7 +177,7 @@ impl fmt::Display for Trash<'_> {
         // is very similar to `println!`.
         write!(
             f,
-            "Trash :( \n\nAtoms {}\nTotal electrons: {}\n",
+            "Trash :( \n\nAtoms {}\nTotal valence electrons: {}\n",
             DisplayableVec(&self.atoms),
             self.total_electrons
         )
