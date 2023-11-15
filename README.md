@@ -1,1 +1,1 @@
-# Atom - Rust atom library, and possibly an atom viewer in the future.
+# Atoms - Rust atom library, and possibly an atom viewer in the future.

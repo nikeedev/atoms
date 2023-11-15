@@ -69,7 +69,7 @@ impl fmt::Display for Atom<'_> {
         // is very similar to `println!`.
         write!(
             f,
-            "Position {{ \n\tx: {}\n\ty: {}\n}}\n\nName: {}\nAtom: {}\nAtom number: {}\n\nEletrons: {}\nProtons: {}\nNeutrons: {}\nState of matter in 20°C: {}\nElement state/type: {}\n",
+            "-----------------------\nPosition {{ \n\tx: {}\n\ty: {}\n}}\n\nName: {}\nAtom: {}\nAtom number: {}\n\nEletrons: {}\nProtons: {}\nNeutrons: {}\nState of matter in 20°C: {}\nElement state/type: {}\n-----------------------\n",
             self.pos.x,
             self.pos.y,
             self.name,
@@ -81,6 +81,17 @@ impl fmt::Display for Atom<'_> {
             self.matter_state,
             self.element_state
         )
+    }
+}
+
+pub struct DisplayableVec<'a>(pub &'a [Atom<'a>]);
+
+impl fmt::Display for DisplayableVec<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for atom in self.0 {
+            writeln!(f, "{}", atom)?;
+        }
+        Ok(())
     }
 }
 
@@ -130,10 +141,42 @@ pub struct Molecule<'a> {
     total_electrons: usize,
 }
 
+impl fmt::Display for Molecule<'_> {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Write strictly the first element into the supplied output
+        // stream: `f`. Returns `fmt::Result` which indicates whether the
+        // operation succeeded or failed. Note that `write!` uses syntax which
+        // is very similar to `println!`.
+        write!(
+            f,
+            "Molecule :D \n\nAtoms {}\nMolecule name: {}\nTotal electrons: {}\n",
+            DisplayableVec(&self.atoms),
+            self.name,
+            self.total_electrons
+        )
+    }
+}
 #[derive(Debug)]
 pub struct Trash<'a> {
     atoms: Vec<Atom<'a>>,
     total_electrons: usize,
+}
+
+impl fmt::Display for Trash<'_> {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Write strictly the first element into the supplied output
+        // stream: `f`. Returns `fmt::Result` which indicates whether the
+        // operation succeeded or failed. Note that `write!` uses syntax which
+        // is very similar to `println!`.
+        write!(
+            f,
+            "Trash :( \n\nAtoms {}\nTotal electrons: {}\n",
+            DisplayableVec(&self.atoms),
+            self.total_electrons
+        )
+    }
 }
 
 fn calculate_total_electrons(atoms: &[Atom]) -> usize {
@@ -152,19 +195,31 @@ pub fn create_molecule(mut atoms: Vec<Atom>) -> Result<Molecule, Trash> {
 
     let mut repeating_elements = 0;
     let mut _repeating_atom: String = String::new();
-    let mut prev_atom: Option<&str> = None;
-    for atom in atoms.iter() {
-        dbg!(atom);
+
+    let mut prev_atom: Option<&str> = Some(atoms.first().unwrap().atom);
+    
+    for (i, atom) in atoms.iter().enumerate() {
+        // dbg!(atom);
+        // dbg!(prev_atom);
+        // dbg!(_repeating_atom.clone());
+        // dbg!(repeating_elements);
+    
         if let Some(prev) = prev_atom {
             if atom.atom == prev {
-                _repeating_atom = atom.atom.to_string();
                 repeating_elements += 1;
             } else {
-                molecule_name.push_str(format!(" {}", match_it(repeating_elements, _repeating_atom.as_str())).as_str());
-                repeating_elements = 0;
+                molecule_name.push_str(format!(" {}", match_it(repeating_elements, prev)).as_str());
+                repeating_elements = 1; // Set to 1 for the current different atom
             }
+        } else {
+            repeating_elements = 1; // Set to 1 for the first atom
         }
         prev_atom = Some(atom.atom);
+    
+        // Add handling for the last atom to update molecule_name
+        if i == atoms.len() - 1 {
+            molecule_name.push_str(format!(" {}", match_it(repeating_elements, prev_atom.unwrap())).as_str());
+        }
     }
 
     // If atoms fulfill the octet rule, create the molecule
